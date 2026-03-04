@@ -1,9 +1,25 @@
 import { neon, type NeonQueryFunction } from "@neondatabase/serverless";
 import type { Application, ApplicationStatus } from "@/types";
 
+/** Normalize POSTGRES_URL: strip "psql '...'" wrapper if user pasted the psql command from Neon. */
+function normalizePostgresUrl(raw: string): string {
+  let url = raw.trim();
+  if (url.startsWith("psql ")) {
+    url = url.slice(5).trim();
+    if (url.startsWith("'") && url.endsWith("'")) {
+      url = url.slice(1, -1);
+    }
+  }
+  return url;
+}
+
 function getSql(): NeonQueryFunction<false, false> | null {
-  const url = process.env.POSTGRES_URL;
-  if (!url) return null;
+  const raw = process.env.POSTGRES_URL;
+  if (!raw) return null;
+  const url = normalizePostgresUrl(raw);
+  if (!url.startsWith("postgresql://") && !url.startsWith("postgres://")) {
+    return null;
+  }
   return neon(url);
 }
 
