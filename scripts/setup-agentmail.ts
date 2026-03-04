@@ -1,4 +1,8 @@
+import { config } from "dotenv";
 import { AgentMailClient } from "agentmail";
+
+// Load .env.local so AGENTMAIL_API_KEY and WEBHOOK_URL are available
+config({ path: ".env.local" });
 
 const client = new AgentMailClient({
   apiKey: process.env.AGENTMAIL_API_KEY!,
